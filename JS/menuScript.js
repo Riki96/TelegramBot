@@ -108,7 +108,24 @@ ShoppingCart = function(){
         	list = [];
         }
     }
+    this.send = function(){
+		const http = require('http');
+
+		// Create an instance of the http server to handle HTTP requests
+		let app = http.createServer((req, res) => {
+		    // Set a response type of plain text for the response
+		    res.writeHead(200, {'Content-Type': 'text/plain'});
+
+		    // Send back a response and end the connection
+		    res.end('Hello World!\n');
+		});
+
+		// Start the server on port 3000
+		app.listen(3000, '127.0.0.1');
+		console.log('Node server running on port 3000');    	
+	}
 }
+
 key = 'AIzaSyDCXWiAe7bmEYrtL0GoI2-cOXpOKCeBdqM';
 name_projecy = 'SmartRestaurantIoT';
 id_project = 'smartrestaurantiot';
@@ -118,54 +135,70 @@ config = {
 	'databaseURL': 'https://smartrestaurantiot.firebaseio.com',
 	'storageBucket': id_project+'.appspot.com'	
 };
+
 firebase.initializeApp(config)
 let db = firebase.database()
 let carrello = new ShoppingCart();
 let punt=0;
-menu = {
-	'Primo':['Pasta','Risotto con le Erbette'],
-	'Secondo':['Carne', 'Pesce']
-}
-let keys;
+
+// menu = {
+// 	'Primo':['Pasta','Risotto con le Erbette'],
+// 	'Secondo':['Carne', 'Pesce']
+// }
+
+let obj;
 window.onload = function(){
 	let menuRef = db.ref('Menu');
-	
-	let values;
 	console.log(menuRef)
 	menuRef.on('value', function(snapshot){
 		console.log(snapshot.val())
 		snapshot.forEach(function(childSnapshot){
-			let obj = childSnapshot.val();
-			keys = Object.keys(obj);
-			// for(let k in keys){
-			// 	values.push(obj[k])
-			// }
+			obj = childSnapshot.val();
+			// keys = Object.keys(obj);
 		})
-	})
-	// console.log(values)
+			checkVariable()
+		})
+	}
+
+function checkVariable(){
+   if ( obj != null ){
+   		let sel = document.getElementById('Enter2');
+    	console.log(obj) 
+    	let keys = Object.keys(obj);
+    	for(let k=0;k<keys.length;k++){
+    		let opt = document.createElement('option');
+    		opt.setAttribute('value',keys[k]);
+    		opt.innerHTML = keys[k]
+    		sel.appendChild(opt)
+    	}
+   }
+   else{
+      window.setTimeout("checkVariable();",10);
+   }
 }
 
 Enter2.onclick = function(){
-	// let newClientKey = db.ref().child('Menu').push().key;
-	// console.log(newClientKey)
-	// db.ref('Menu/'+newClientKey).set(menu)
-	bt2 = document.getElementById('dropdownMenu');
-	a = document.createElement('a');
-	a.setAttribute('class','dropdown-item');
-	a.setAttribute('name',keys[0])
-	bt2.appendChild(a)
-}
-
-// Enter.onclick = function(){
 	// var leadsRef = db.ref('leads');
 	// leadsRef.on('value', function(snapshot) {
 	//     snapshot.forEach(function(childSnapshot) {
 	//       var childData = childSnapshot.val();
 	//       console.log(childData['name'])
 	//     });
-	// });	
-// }
-
+	// });	{
+	let sel = document.getElementById('Enter');
+	sel.innerHTML = 'Choose Dish'
+	let selected = Enter2.value;
+	let dishes = obj[selected];
+	// console.log(dishes)
+	for(let k=0;k<dishes.length;k++){
+		let opt = document.createElement('option');
+		if(dishes[k] != null){
+			opt.setAttribute('value',dishes[k]);	
+			opt.innerHTML = dishes[k]
+			sel.appendChild(opt)
+    	}		
+	}
+}
 
 onkeydown = function(e){
 	if(e.keyCode == 38 && punt>=0){
@@ -187,11 +220,19 @@ onkeydown = function(e){
 	}
 }
 add.onclick = function(){
-	carrello.process(Enter.value);
-	carrello.count();
+	let val = Enter.value;
+	if(val == null){
+		alert('Please, choose first a dish!')
+	}else{
+		carrello.process(Enter.value);
+		carrello.count();
+	}
 }
 clear.onclick = function(){
    carrello.clear();
    carrello.count();
+}
+send.onclick = function(){
+	carrello.send()
 }
 

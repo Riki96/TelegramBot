@@ -25,6 +25,20 @@
 	font-size: 0.7em;
 	margin: 3px;
 }
+.send_button{
+	clear: both;
+	display: block;
+}
+.send{
+	float: right;
+	padding: 15px;
+    color: white;
+	background-color: blue;
+	border-radius: 10%;
+	border-style: none;
+	font-size: 0.7em;
+	margin: 3px;	
+}
 
 .clear{
     padding: 15px;

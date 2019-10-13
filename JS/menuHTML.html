@@ -8,32 +8,37 @@
         <script type="text/javascript" src="menu.json"></script>
         <script src="jquery-3.4.1.min.js"></script>
         <script src="https://www.gstatic.com/firebasejs/3.2.0/firebase.js"></script>
+        <script src="require.js"></script>
 </head>
 <body>
     <div class="container">
 	  	<div class="ShoppingList" id="prova">
                         <h4 class="glyphicon glyphicon-shopping-cart"></h4>
-	  		Shopping List
+	  		Order from Menu
 	  	</div>
 	  	<div class="items" id="items">
 	  		items
 	  	</div>        
         <div class="panel2">
         	<div class="ShoppingList">
-        		<div class="dropdown">
-	  				<button type="button" name="Enter2" id="Enter2" class="btn btn-secondary dropdown-toggle">Choose Dish</button>
-	  				<div class="dropdown-menu" aria-labelledby="dropdownMenuButton" id="dropdownMenu"></div>
-	  			</div>
-        	<button type="button" name="Enter" id="Enter" class="btn btn-secondary dropdown-toggle">Choose Type</button>
-	  		<!-- <input type="text" name="Enter" id="Enter" class="Enter"> -->
+                <div class="dropdown">
+                    <select class="custom-select" id="Enter2" required>
+                    	<option value="" disabled selected hidden>Choose Type</option>
+                    </select>
+                    <select class="custom-select" id="Enter" required>
+                    	<option value="" disabled selected hidden>Choose Dish</option>
+                    </select>
+                </div>
 	  	    </div>
 	  	    <div class="items">
-	  	    	<button id = "add" class=" add button add glyphicon glyphicon-plus" ></button>
-	  	    	<button id = "clear" class=" clear clear glyphicon glyphicon-trash"></button>
+	  	    	<button id = "add" class="add button add glyphicon glyphicon-plus" ></button>
+	  	    	<button id = "clear" class="clear clear glyphicon glyphicon-trash"></button>
+	  	    	<button id="send" class="send glyphicon glyphicon-ok"></button>
 	  	    </div>
         </div>
         <div class="panel3" id="panel3">
-        </div>	  	
+        </div>
+		
   </div>
 <script src="menuScript.js"></script>
 </body>
