@@ -109,45 +109,52 @@ ShoppingCart = function(){
         }
     }
     this.send = function(){
-    	let c = {
-    		'Name':'Riccardo',
-    		'ID':'c00000',
-    		'Orders':['']
-    	}
-    	let m = {
-    		'Primo':['Riso', 'Pasta'],
-    		'Secondo':['Carne', 'Pesce']
+  //   	let c = {
+  //   		'Name':'Riccardo',
+  //   		'ID':'c00000',
+  //   		'Orders':['']
+  //   	}
+  //   	let m = {
+  //   		'Primo':['Riso', 'Pasta'],
+  //   		'Secondo':['Carne', 'Pesce']
 
-    	}
-    	const Http = new XMLHttpRequest();
-		const url='https://smartrestaurantiot.firebaseio.com/Restaurants.json'
-		Http.open("POST", url);
-		let js = JSON.stringify(m)
-		Http.send(js);
-		Http.onreadystatechange = (e) => {
-		  console.log(Http.responseText)
-		}
+  //   	}
+  //   	const Http = new XMLHttpRequest();
+		// const url='https://smartrestaurantiot.firebaseio.com/Restaurants.json'
+		// Http.open("POST", url);
+		// let js = JSON.stringify(m)
+		// Http.send(js);
+		// Http.onreadystatechange = (e) => {
+		//   console.log(Http.responseText)
+		// }
 
-		// let ref = db.ref('Restaurants');
+		let ref = db.ref('Restaurants');
 		// ref.on('value', gotData, errData);
+		gotData()
 	}
 }
 
-function gotData(data){
-	// console.log(data.val())
-	let rest = data.val();
-	let keys = Object.keys(rest);
-	let c_id = 'c00000';
-
-	keys.forEach(function(elem){
-		let custs = rest[elem].Restaurant.Customers;
-		for(let c=0; c<custs.length;c++){
-			// console.log(custs[c])
-			if (c_id == custs[c].ID){
-				custs[c].Orders = JSON.stringify(list);
-			}
-		}
+function gotData(){
+	// console.log(data)
+	// let rest = data.val();
+	// let keys = Object.keys(rest);
+	// let c_id = 'c00000';
+	// console.log(keys)
+	// keys.forEach(function(elem){
+	// 	let custs = rest[elem].Restaurant.Customers;
+	// 	for(let c=0; c<custs.length;c++){
+	// 		if (c_id == custs[c].ID){
+	// 			data.push(list)
+	// 		}
+	// 	}
+	// })
+	let rootRef = db.ref('Restaurants');
+	rootRef.once('value').then(function(snapshot){
+		snapshot.once('value').then(function(childSnap){
+			console.log(childSnap.child('Restaurant').val())
+		})
 	})
+
 }
 function errData(err){
 	console.log('Error')
@@ -177,9 +184,9 @@ let punt=0;
 let obj;
 window.onload = function(){
 	let menuRef = db.ref('Restaurants');
-	console.log(menuRef)
+	// console.log(menuRef)
 	menuRef.on('value', function(snapshot){
-		console.log(snapshot.val())
+		// console.log(snapshot.val())
 		snapshot.forEach(function(childSnapshot){
 			obj = childSnapshot.val();
 			console.log(obj)
@@ -191,15 +198,24 @@ window.onload = function(){
 function checkVariable(){
    if ( obj != null ){
    		let sel = document.getElementById('Enter2');
-    	console.log(obj) 
-    	let keys = Object.keys(obj);
-    	console.log(keys)
+    	// console.log(obj.Restaurant.Menu) 
+    	// let keys = Object.keys(obj);
+    	// console.log(keys)
+    	// for(let k=0;k<keys.length;k++){
+    	// 	let opt = document.createElement('option');
+    	// 	opt.setAttribute('value',keys[k]);
+    	// 	opt.innerHTML = keys[k]
+    	// 	sel.appendChild(opt)
+    	// }
+    	let menu = obj.Restaurant.Menu;
+    	let keys = Object.keys(menu);
     	for(let k=0;k<keys.length;k++){
-    		let opt = document.createElement('option');
+    		let opt = document.createElement('option')
     		opt.setAttribute('value',keys[k]);
     		opt.innerHTML = keys[k]
     		sel.appendChild(opt)
     	}
+
    }
    else{
       window.setTimeout("checkVariable();",10);
@@ -217,7 +233,7 @@ Enter2.onclick = function(){
 	let sel = document.getElementById('Enter');
 	sel.innerHTML = 'Choose Dish'
 	let selected = Enter2.value;
-	let dishes = obj[selected];
+	let dishes = obj.Restaurant.Menu[selected];
 	// console.log(dishes)
 	for(let k=0;k<dishes.length;k++){
 		let opt = document.createElement('option');
