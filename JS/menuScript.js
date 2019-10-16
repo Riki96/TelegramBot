@@ -109,21 +109,49 @@ ShoppingCart = function(){
         }
     }
     this.send = function(){
-		const http = require('http');
+    	let c = {
+    		'Name':'Riccardo',
+    		'ID':'c00000',
+    		'Orders':['']
+    	}
+    	let m = {
+    		'Primo':['Riso', 'Pasta'],
+    		'Secondo':['Carne', 'Pesce']
 
-		// Create an instance of the http server to handle HTTP requests
-		let app = http.createServer((req, res) => {
-		    // Set a response type of plain text for the response
-		    res.writeHead(200, {'Content-Type': 'text/plain'});
+    	}
+    	const Http = new XMLHttpRequest();
+		const url='https://smartrestaurantiot.firebaseio.com/Restaurants.json'
+		Http.open("POST", url);
+		let js = JSON.stringify(m)
+		Http.send(js);
+		Http.onreadystatechange = (e) => {
+		  console.log(Http.responseText)
+		}
 
-		    // Send back a response and end the connection
-		    res.end('Hello World!\n');
-		});
-
-		// Start the server on port 3000
-		app.listen(3000, '127.0.0.1');
-		console.log('Node server running on port 3000');    	
+		// let ref = db.ref('Restaurants');
+		// ref.on('value', gotData, errData);
 	}
+}
+
+function gotData(data){
+	// console.log(data.val())
+	let rest = data.val();
+	let keys = Object.keys(rest);
+	let c_id = 'c00000';
+
+	keys.forEach(function(elem){
+		let custs = rest[elem].Restaurant.Customers;
+		for(let c=0; c<custs.length;c++){
+			// console.log(custs[c])
+			if (c_id == custs[c].ID){
+				custs[c].Orders = JSON.stringify(list);
+			}
+		}
+	})
+}
+function errData(err){
+	console.log('Error')
+	console.log(err)
 }
 
 key = 'AIzaSyDCXWiAe7bmEYrtL0GoI2-cOXpOKCeBdqM';
@@ -148,13 +176,13 @@ let punt=0;
 
 let obj;
 window.onload = function(){
-	let menuRef = db.ref('Menu');
+	let menuRef = db.ref('Restaurants');
 	console.log(menuRef)
 	menuRef.on('value', function(snapshot){
 		console.log(snapshot.val())
 		snapshot.forEach(function(childSnapshot){
 			obj = childSnapshot.val();
-			// keys = Object.keys(obj);
+			console.log(obj)
 		})
 			checkVariable()
 		})
@@ -165,6 +193,7 @@ function checkVariable(){
    		let sel = document.getElementById('Enter2');
     	console.log(obj) 
     	let keys = Object.keys(obj);
+    	console.log(keys)
     	for(let k=0;k<keys.length;k++){
     		let opt = document.createElement('option');
     		opt.setAttribute('value',keys[k]);
