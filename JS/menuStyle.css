@@ -1,6 +1,9 @@
 .container{
-	padding: 5%;
+	padding: 2%;
 	font-family: sans-serif;
+	border-style: solid;
+	margin-top: 20px;
+	background-color: rgba(100,100,100,0.4);
 }
 
 .ShoppingList{
@@ -72,7 +75,7 @@
 
 .panel2{
 	padding: 30px;
-	padding-top: 50px;
+	padding-top: 100px;
 }
 
 .panel3{
@@ -121,3 +124,23 @@
 	font-size: 1.3em;
 }
 
+.menu_div/*{
+	float: right;
+}*/
+.menu_id{
+	float: right;
+	/*width: 40%;*/
+	text-align: right;
+	/*font-size: 2em;*/
+	font-style: italic;
+	font-weight: bold;
+	color: #FFFFFF;
+	background-color: #FF3020;
+}
+.body{
+	background-image: url('cibo.jpg');
+	/*overflow-y: scroll;*/
+	/*height: 1801px;*/
+	background-repeat: no-repeat;
+  	background-size: cover
+}

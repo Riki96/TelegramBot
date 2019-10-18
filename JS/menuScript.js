@@ -3,25 +3,21 @@ let list=[];
 ShoppingCart = function(){
 	this.count = function(){
     	let n = 0;
-    	for(let i of list)
-    	{
+    	for(let i of list){
     		n = n + i.quantity;
     	}
     	items.innerHTML = n + " items";
     }
 	this.process = function(name){
 		let flag = 0;
-		for(let e of list)
-		{
-			if(e.name == name)
-			{
+		for(let e of list){
+			if(e.name == name){
 				flag = 1;
 				e.quantity++;
 				e.nodo.childNodes[1].innerHTML ="Quantity: " + e.quantity;
 			}
 		}
-		if(flag == 0)
-		{    
+		if(flag == 0){    
 			let nodo = document.createElement("div");
             nodo.setAttribute("class","product");
 			let e = {  name : name,
@@ -127,34 +123,18 @@ ShoppingCart = function(){
 		// Http.onreadystatechange = (e) => {
 		//   console.log(Http.responseText)
 		// }
-
-		let ref = db.ref('Restaurants');
 		// ref.on('value', gotData, errData);
 		gotData()
 	}
 }
 
 function gotData(){
-	// console.log(data)
-	// let rest = data.val();
-	// let keys = Object.keys(rest);
-	// let c_id = 'c00000';
-	// console.log(keys)
-	// keys.forEach(function(elem){
-	// 	let custs = rest[elem].Restaurant.Customers;
-	// 	for(let c=0; c<custs.length;c++){
-	// 		if (c_id == custs[c].ID){
-	// 			data.push(list)
-	// 		}
-	// 	}
-	// })
 	let rootRef = db.ref('Restaurants');
-	rootRef.once('value').then(function(snapshot){
-		snapshot.once('value').then(function(childSnap){
-			console.log(childSnap.child('Restaurant').val())
-		})
+	rootRef.on('value', function(snap){
+		console.log(typeof snap)
+		snap.update({'Restaurant/Customers/Orders':'Ciao'})
 	})
-
+	
 }
 function errData(err){
 	console.log('Error')
