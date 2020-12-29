@@ -365,7 +365,7 @@ class SmartRestaurant:
         )
 
         dp.add_handler(conv_handler)
-        updater.start_webhook(listen='0.0.0.0', port=6969, url_path=TOKEN)
+        updater.start_webhook(listen='0.0.0.0', port=PORT, url_path=TOKEN)
         updater.bot.set_webhook(APP_NAME + TOKEN)
         updater.start_polling()
         updater.idle()
