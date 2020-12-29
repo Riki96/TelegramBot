@@ -4,6 +4,7 @@ from telegram.ext import ConversationHandler, Filters
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
 import logging
 import json
+import os
 from functions import *
 from BotFilters import *
 from RestaurantPublisher import Publisher
@@ -16,6 +17,7 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+PORT = int(os.environ.get('PORT', '8443'))
 
 class SmartRestaurant:
     def __init__(self):
@@ -334,7 +336,9 @@ class SmartRestaurant:
         print('AAA')
 
     def main(self):
-        updater = Updater('892866853:AAF3W2Dns7-Koiayk-2fuDgIDiFCfrLEfLw', use_context=True)
+        TOKEN = '892866853:AAF3W2Dns7-Koiayk-2fuDgIDiFCfrLEfLw'
+        APP_NAME = 'order-eat2021'
+        updater = Updater(TOKEN, use_context=True)
 
         # Get the dispatcher to register handlers:
         dp = updater.dispatcher
@@ -361,6 +365,8 @@ class SmartRestaurant:
         )
 
         dp.add_handler(conv_handler)
+        updater.start_webhook(listen='0.0.0.0', port=6969, url_path=TOKEN)
+        updater.bot.set_webhook(APP_NAME + TOKEN)
         updater.start_polling()
         updater.idle()
 
