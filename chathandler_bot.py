@@ -338,6 +338,7 @@ class SmartRestaurant:
     def main(self):
         TOKEN = '892866853:AAF3W2Dns7-Koiayk-2fuDgIDiFCfrLEfLw'
         APP_NAME = 'order-eat2021'
+        URL_APP = f'https://{APP_NAME}.herokuapp.com/'
         updater = Updater(TOKEN, use_context=True)
 
         # Get the dispatcher to register handlers:
@@ -366,7 +367,7 @@ class SmartRestaurant:
 
         dp.add_handler(conv_handler)
         updater.start_webhook(listen='0.0.0.0', port=PORT, url_path=TOKEN)
-        updater.bot.set_webhook(APP_NAME + TOKEN)
+        updater.bot.set_webhook(URL_APP + TOKEN)
         # updater.start_polling()
         updater.idle()
 
