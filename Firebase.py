@@ -3,6 +3,8 @@ import os
 import pyrebase
 from thingsboard.main import ThingsDash
 import datetime
+import copy
+from FeedbackSender import Sender
 
 
 class Firebase:
@@ -17,6 +19,7 @@ class Firebase:
             'appId': "1:89417842986:web:162875424095cecd65de53",
             'measurementId': "G-BHVSYJK293"
         }
+        self.sender = Sender()
         self.firebase = pyrebase.initialize_app(self.config)
         self.td = ThingsDash()
         self.start_stream = True
@@ -49,26 +52,20 @@ class Firebase:
         """
         self.db.child(field).child(key).set(data2upload)
 
-    def upload_booking(self, restaurant_key, hour, n_people, user_id):
+    def upload_booking(self, user_firebase, restaurant_key, hour, n_people, user_id):
         # Check before uploading
-        # prev_data = self.db.child('restaurants').child(restaurant_key).child('bookings').get().val()
         hash_key = self.hash_creator(user_id, hour, n_people)
-        # table_key = self.check_table_availability(restaurant_key, hash_key)
-        # if prev_data is None:
-        #     # No other bookings for that restaurant
-        #     data = {hash_key: user_id}
-        #     self.db.child('restaurants').child(restaurant_key).child('bookings').set(data)
-        # else:
-        # check if user has already bookings for that restaurant
         table_key = self.check_table_availability(restaurant_key, hash_key)
         if len(table_key) > 0:
-            # data = dict(prev_data)
-            # data.update({hash_key: user_id})
             to_set = {
                 'bot_id': user_id,
                 'table_id': table_key
             }
+            for t in table_key:
+                token = self.db.child(f'restaurants/{restaurant_key}/details/token_order').get().val()
+                self.sender.send(f'{token}_item:table:{t}', {'reserved': True}, 'attributes')
             self.db.child('restaurants').child(restaurant_key).child('bookings').child(hash_key).set(to_set)
+            self.db.child(f'users/{user_id}/active').update({'table_id': table_key})
         else:
             # TODO: no tables available; create new path
             print('Your booking was not uploaded')
@@ -86,10 +83,10 @@ class Firebase:
     #             # Maybe ask if the user want to book
     #             book_state = False
     #     return book_state
-
+    
     def check_table_availability(self, restaurant_key, hash_key):
         tables = self.download(f'restaurants/{restaurant_key}/details/tables')
-        t_new = tables
+        t_new = copy.deepcopy(tables)
         u_date, u_hour, u_people, u_user = self.unhash(hash_key)
         try:
             bookings = self.download(f'restaurants/{restaurant_key}/bookings')
@@ -98,13 +95,11 @@ class Firebase:
                 date, hour, people, user = self.unhash(k)
                 if hour == u_hour:
                     p = int(people)
-                    assigned = self.assign_table(p, t_new)
-                    for t in assigned:
-                        t_new[t] = int(t_new[t]) - 1
+                    assigned, t_new = self.assign_table(p, t_new)
         except:
             print('No bookings')
         p = int(u_people)
-        assigned = self.assign_table(p, t_new)
+        assigned, t_new = self.assign_table(p, t_new)
         table_key = self.assign_key_table(tables, t_new, assigned)
         if len(assigned) > 0:
             return table_key
@@ -121,8 +116,8 @@ class Firebase:
                     break
                 else:
                     to_add += v
-            table_key = [int(t_new[assigned[0]]) + to_add]
-        else:
+            table_key = [int(t_old[assigned[0]]) - int(t_new[assigned[0]]) + to_add]
+        elif len(assigned) > 1:
             table_key = []
             for a in assigned:
                 to_add = 0
@@ -132,20 +127,31 @@ class Firebase:
                         break
                     else:
                         to_add += v
-                table_key.append(int(t_new[a]) + to_add)
+                table_key.append(int(t_old[a]) - int(t_new[a]) + to_add)
+        else:
+            table_key = None
         return table_key
 
     @staticmethod
     def assign_table(people, tables):
+        tables_assigned = None
         for k, v in tables.items():
-            for kk, vv in tables.items():
-                if int(k) == people and int(v) > 0:
-                    return [k]
-                if int(kk) == people and int(vv) > 0:
-                    return [kk]
-                if (int(v) > 0) and (int(vv) > 0) and (int(kk + k) <= people + 1):
-                    return [k, kk]
-        return None
+            if int(v) > 0 and int(k) >= people:
+                tables_assigned = [k]
+                break
+        if tables_assigned is None:
+            for k, v in tables.items():
+                for kk, vv in tables.items():
+                    if (int(v) > 0) and (int(vv) > 0) and (int(kk) + int(k) >= people) and kk != k:
+                        tables_assigned = [k, kk]
+                        break
+                    elif (int(v) > 1) and (int(vv) > 1) and (int(kk) + int(k) >= people) and kk == k:
+                        tables_assigned = [k, kk]
+                        break
+        for t in tables_assigned:
+            tables[t] = int(tables[t]) - 1
+
+        return tables_assigned, tables
 
     def get_available_tables(self, restaurant_key):
         tables = self.download(f'restaurants/{restaurant_key}/details/tables')
@@ -171,33 +177,6 @@ class Firebase:
         n_people = key[13:15]
         user = key[15:]
         return date, hour, n_people, user
-
-    # def specific_download(self, field, reference, n=1):
-    #     activity_times = [
-    #         '10 min', '10-20 min', '20-30 min',
-    #         '30-60 min', '1-2 h', '2-3 h',
-    #         '3-8 h', '>8 h'
-    #     ]
-    #     modes = ['unknown_activity_type', 'Car', 'Walk', 'Bike',
-    #              'Bus/Tram', 'in_passenger_vehicle', 'Train', 'in_bus', 'Subway',
-    #              'flying', 'motorcycling', 'running']
-    #
-    #     query = self.db.child(field).order_by_child("user_id").equal_to(reference).get().val()
-    #
-    #     pretty_query = ''
-    #     categories = []
-    #     destinations = []
-    #     for i in query.values():
-    #         categories.append(i['category'])
-    #         destinations.append(i['D']['name'])
-    #         s = f"From {i['O']['name']} to {i['D']['name']} for {activity_times[i['activity_time']]} by {modes[i['mode']]}\n"
-    #         pretty_query += s
-    #
-    #     n_trips = len(query)
-    #     most_categories = self.most_frequent(categories, n)
-    #     most_destinations = self.most_frequent(destinations, n)
-    #
-    #     return pretty_query, n_trips, most_categories, most_destinations
 
     def callback_listen(self, message):
         if self.start_stream:
@@ -227,15 +206,14 @@ class Firebase:
                     ts.pop('address', None)
                     ts.pop('is_bot', None)
                     ts.pop('order_status', None)
-                    total = ts['total'] + 'Euro'
+                    total = f"{ts['total']} Euro"
                     ts.pop('total', None)
-                    order = [v['item'] + 'x' + v['quantity'] for v in ts.values()]
+                    order = [f"{v['item']} x {v['quantity']}" for v in ts.values()]
                     order = ' - '.join(order)
                     payload = {"order": order, "user": user, 'total': total}
                     print(payload)
                     for t in table_key:
                         access_token = f"{token}_item:table:{t}"
-                        print(access_token)
                         self.td.create_table_order(device_access_token=access_token,
                                                    payload=payload)
             except:
@@ -250,16 +228,7 @@ class Firebase:
 if __name__ == '__main__':
     fb = Firebase()
     fb.authenticate()
-    # fb.db.child('users').child('Q4RbTEUSanS2k9ErfXaKFdoy6KQ2').child('details').update({'table_key': 'GIGI'})
-    # fb.get_available_tables('WVqxkU2XXuQ988euCmqbcUvrQfp1')
     import time
-
-    # try:
-    #     while True:
-    #         fb.listener()
-    #         time.sleep(3)
-    # except:
-    #     fb.stream.close()
     fb.listener()
     try:
         while True:
