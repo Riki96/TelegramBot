@@ -40,7 +40,7 @@ class TelegramBot:
         self.fb = Firebase()
         self.sender = Sender()
         self.fb.authenticate()
-        # self.fb.listener()
+        self.fb.listener()
         self.restaurants = self.fb.download('restaurants')
         self.restaurants_names = [r['details']['name'] for r in self.restaurants.values()]
         self.restaurants_mapper = {self.restaurants_names[i]: list(self.restaurants.keys())[i]
