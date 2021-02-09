@@ -23,7 +23,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # PORT where exposing the telegram, needed for continuously run on the heroku server
-with open('catalog.json', 'r') as f:
+with open('../catalog.json', 'r') as f:
     CONFIG = json.loads(f.read())
 
 HEROKU = CONFIG['heroku']
@@ -40,9 +40,9 @@ class TelegramBot:
         self.fb = Firebase()
         self.sender = Sender()
         self.fb.authenticate()
-        self.fb.listener()
+        # self.fb.listener()
         self.restaurants = self.fb.download('restaurants')
-        self.restaurants_names = [r['details']['name'] for r in self.restaurants.values()]
+        self.restaurants_names = [r['details']['name'].lower().strip() for r in self.restaurants.values()]
         self.restaurants_mapper = {self.restaurants_names[i]: list(self.restaurants.keys())[i]
                                    for i in range(len(self.restaurants_names))}
 
@@ -592,9 +592,9 @@ class TelegramBot:
 
         dp.add_handler(conv_handler)
         # dp.add_handler(CommandHandler('book', self.book_))
-        updater.start_webhook(listen='0.0.0.0', port=PORT, url_path=self.token)
-        updater.bot.set_webhook(APP_URL)
-        # updater.start_polling()
+        # updater.start_webhook(listen='0.0.0.0', port=PORT, url_path=self.token)
+        # updater.bot.set_webhook(APP_URL)
+        updater.start_polling()
         updater.idle()
 
 
