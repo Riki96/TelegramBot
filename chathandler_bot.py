@@ -591,10 +591,9 @@ class TelegramBot:
         )
 
         dp.add_handler(conv_handler)
-        # dp.add_handler(CommandHandler('book', self.book_))
-        # updater.start_webhook(listen='0.0.0.0', port=PORT, url_path=self.token)
-        # updater.bot.set_webhook(APP_URL)
-        updater.start_polling()
+        updater.start_webhook(listen='0.0.0.0', port=PORT, url_path=self.token)
+        updater.bot.set_webhook(APP_URL)
+        # updater.start_polling()
         updater.idle()
 
 
