@@ -554,7 +554,8 @@ class TelegramBot:
         pretty_order = ''
         for k, v in last_order.items():
             pretty_order += f'{v["item"]}x{v["quantity"]} = {int(v["quantity"])*float(v["price"])} Euro\n'
-        return pretty_order, last_order['total']
+        print(pretty_order)
+        return pretty_order, total
 
     def others(self, bot, update):
         others = """
