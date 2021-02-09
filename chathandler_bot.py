@@ -40,10 +40,10 @@ class TelegramBot:
         self.fb = Firebase()
         self.sender = Sender()
         self.fb.authenticate()
-        # self.fb.listener()
+        self.fb.listener()
         self.restaurants = self.fb.download('restaurants')
-        self.restaurants_names = [r['details']['name'] for r in self.restaurants.values()]
-        self.restaurants_mapper = {self.restaurants_names[i].lower().strip(): list(self.restaurants.keys())[i]
+        self.restaurants_names = [r['details']['name'].lower().strip() for r in self.restaurants.values()]
+        self.restaurants_mapper = {self.restaurants_names[i]: list(self.restaurants.keys())[i]
                                    for i in range(len(self.restaurants_names))}
 
         self.initial_keyboard = [['Book', 'Order', 'Feedback'], ['Join', 'Wait', 'CheckOut'], ['Info']]
@@ -322,7 +322,7 @@ class TelegramBot:
         logger.info(f'BOOK: {self.user_id} sent: {bot.message.text}')
         restaurant_chosen = bot.message.text
         self.restaurant_name = restaurant_chosen
-        self.restaurant_key = self.restaurants_mapper[restaurant_chosen.lower().strip()]
+        self.restaurant_key = self.restaurants_mapper[restaurant_chosen]
         if self.fb.db.child(f'users/{self.fb_id}/active').get().val() is not None:
             logger.info(f'BOOK: {self.user_id} already has a booking in the restaurant')
             message = f'You already have a Booking at {restaurant_chosen}. Do you want to delete it?'
@@ -547,7 +547,14 @@ class TelegramBot:
         logger.info(f'CHECKOUT: removed from {self.user_id} the active object.\nRemoved from thingsboard'
                     f'reservation.\nRemoved from Firebase Restaurant\'s active customer')
 
-        return last_order, last_order['total']
+        total = last_order['total']
+        last_order.pop('total', None)
+        last_order.pop('is_bot', None)
+        last_order.pop('order_status', None)
+        pretty_order = ''
+        for k, v in last_order.items():
+            pretty_order += f'{v["item"]}x{v["quantity"]} = {int(v["quantity"])*float(v["price"])} Euro\n'
+        return pretty_order, last_order['total']
 
     def others(self, bot, update):
         others = """
@@ -591,6 +598,7 @@ class TelegramBot:
         )
 
         dp.add_handler(conv_handler)
+        # dp.add_handler(CommandHandler('book', self.book_))
         updater.start_webhook(listen='0.0.0.0', port=PORT, url_path=self.token)
         updater.bot.set_webhook(APP_URL)
         # updater.start_polling()
