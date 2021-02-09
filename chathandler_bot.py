@@ -23,7 +23,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # PORT where exposing the telegram, needed for continuously run on the heroku server
-with open('../catalog.json', 'r') as f:
+with open('catalog.json', 'r') as f:
     CONFIG = json.loads(f.read())
 
 HEROKU = CONFIG['heroku']
