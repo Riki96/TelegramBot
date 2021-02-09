@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class Sender:
     def __init__(self):
-        with open('../catalog.json', 'r') as f:
+        with open('catalog.json', 'r') as f:
             self.config = json.loads(f.read())['thingsboard']
         self.th_host = self.config['host']
         self.th_port = self.config['http_port']

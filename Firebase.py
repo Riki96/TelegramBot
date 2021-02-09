@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 class Firebase:
     def __init__(self):
-        with open('../catalog.json', 'r') as f:
+        with open('catalog.json', 'r') as f:
             self.config = json.loads(f.read())['firebase']
         self.sender = Sender()
         self.firebase = pyrebase.initialize_app(self.config)
