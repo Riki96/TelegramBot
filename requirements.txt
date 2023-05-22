@@ -9,4 +9,4 @@ python_telegram_bot == 12.1.1
 
 # C:\Users\Riccardo\Desktop\IOT_Restaurant\Bot\FeedbackSender.py: 2
 # C:\Users\Riccardo\Desktop\IOT_Restaurant\Bot\thingsboard\main.py: 1
-requests == 2.21.0
+requests == 2.31.0
